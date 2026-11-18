@@ -18,7 +18,7 @@ lock = Lock()
 chunks = []
 chunk_ids = []
 for passage_id, passage in enumerate(KB):
-    for sentence in re.split(r"(?<=[.!?])\\s+", passage.strip()):
+    for sentence in re.split(r"(?<=[.!?])\s+", passage.strip()):
         if sentence:
             chunks.append(sentence)
             chunk_ids.append(passage_id)
