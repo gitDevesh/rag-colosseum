@@ -62,7 +62,7 @@ def query(request: Query):
     selected = ranked[:request.top_k]
     sentences = []
     for i in selected[:min(3,len(selected))]:
-        for s in re.split(r"(?<=[.!?])\\s+", KB[i]):
+        for s in re.split(r"(?<=[.!?])\s+", KB[i]):
             if s.strip():
                 overlap = len(set(tokenize(s)) & terms)
                 score = overlap * (1.0 if i == best else 0.75)
