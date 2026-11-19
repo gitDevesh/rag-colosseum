@@ -1,5 +1,2 @@
-fastapi
-uvicorn[standard]
-sentence-transformers
-numpy
-pydantic
+fastapi>=0.110,<1
+uvicorn>=0.29,<1
