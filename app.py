@@ -158,3 +158,12 @@ def query(request: Query):
     scores = [round(min(1.0,max(0.0,next(s for s,j in scored if j==i)/peak)),4) for i in source_ids]
     confidence = round(min(0.97,0.65+0.30*overlap),4)
     return {"answer":answer,"sources":source_ids,"scores":scores,"confidence":confidence}
+
+
+# Offline smoke tests run once at startup; never block serving if a test fails.
+try:
+    from evaluation import evaluate
+    _evaluation = evaluate(query, Query)
+    print("RAG_EVALUATION_SUMMARY " + json.dumps(_evaluation), flush=True)
+except Exception as exc:
+    print("RAG_EVALUATION_ERROR " + repr(exc), flush=True)
