@@ -152,10 +152,13 @@ def query(request: Query):
     compare = bool(re.search(r"\b(?:compare|versus|vs|difference|both|respectively|between|each)\b", q, re.I))
     numeric_intent = bool(re.search(r"\b(?:what|how many|how long|port|size|number|interval|timeout|duration|threshold|bits|quorum|batch|blocks|time|window|length|lease)\b",q,re.I))
     for score, i in scored[:max(5, request.top_k)]:
+        if not compare and i != best:
+            continue
         for s in SENTENCES[i]:
-            has_number = bool(re.search(r"\\b\\d+(?:\\.\\d+)?\\b",s))
-            numeric_intent = bool(re.search(r"\\b(?:what|how many|how long|port|size|number|interval|timeout|duration|threshold|bits|quorum|batch|blocks|time|window)\\b",q,re.I))
-            candidates.append((sentence_score(q,s) + (4.0 if numeric_intent and has_number else 0.0) + (6.0 if i==best else 0.0) + 0.12*score, score, i, s))
+            has_number = bool(re.search(r"\b\d+(?:\.\d+)?\b", s))
+            if numeric_intent and not has_number:
+                continue
+            candidates.append((sentence_score(q,s) + (5.0 if numeric_intent else 0.0) + 0.12*score, score, i, s))
     candidates.sort(reverse=True)
     top_sentence_score, _, answer_source, sentence = candidates[0]
     if top_sentence_score < 1.8:
