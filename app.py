@@ -14,7 +14,7 @@ assert len(KB) == 50
 STOP = set("the a an is are was were do does did of for to in on at by from with and or what which how many much long often default configured configuration value used uses use does its it this that be as when where who whose between compared versus vs according based knowledge base passage specify mentioned".split())
 SYN = {"heartbeat":"heartbeats", "timeout":"timeouts", "port":"ports", "acknowledgement":"acknowledgment", "replication":"replica", "cryptography":"cryptographic", "interval":"intervals", "batch":"batches", "size":"sizes", "key":"keys", "hash":"hashing", "connection":"connections", "server":"servers", "node":"nodes", "quorum":"quorums", "latency":"delay", "delay":"latency", "election":"elect", "commit":"commits", "duration":"time", "time":"timeout"}
 def tokenize(text):
-    words = re.findall(r"[a-z]+|\d+(?:\\.\d+)?", text.lower())
+    words = re.findall(r"[a-z]+|\d+(?:\.\d+)?", text.lower())
     result = []
     for w in words:
         if w in STOP: continue
