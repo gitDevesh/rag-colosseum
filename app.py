@@ -44,6 +44,10 @@ class Query(BaseModel):
     question: str = Field(min_length=1, max_length=3000)
     top_k: int = Field(default=3, ge=1, le=50)
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "rag-colosseum", "endpoint": "/query", "passages": len(KB)}
+
 @app.get("/health")
 def health():
     return {"status":"ok","passages":len(KB)}
