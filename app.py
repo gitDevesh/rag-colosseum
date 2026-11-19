@@ -108,7 +108,7 @@ def numeric_answer(question, sentence):
         nearby = terms_of(prefix)
         version_penalty = 8 if m.group().strip() in re.findall(r"\b\d+\.\d+\b", question) else 0
         return (len(qterms & nearby)*2 - version_penalty, m.start())
-    return max(matches,key=score).group().strip()
+    return max(matches,key=lambda m: (bool(re.search(r"\b(?:ms|bits|bytes|samples|tokens|nodes|acceptors|participants|replicas|members|layers|blocks|records|retries|%)\b",m.group(),re.I)), score(m))).group().strip()
 
 @app.post("/query")
 def query(request: Query):
@@ -137,9 +137,9 @@ def query(request: Query):
         phrase = " ".join(intro.split()[:3])
         bonus = 0.0
         if len(name)>2 and re.search(r"(?<![a-z])"+re.escape(name)+r"(?![a-z])",original_q):
-            bonus += 32.0
+            bonus += 100.0
         if phrase in q.lower():
-            bonus += 30.0
+            bonus += 100.0
         if i==36 and re.search(r"tls\s*1\.3",original_q): bonus += 45.0
         if i==37 and re.search(r"tls\s*1\.2",original_q): bonus += 45.0
         scored[i] = (scored[i][0]+bonus,i)
@@ -151,14 +151,20 @@ def query(request: Query):
     candidates = []
     compare = bool(re.search(r"\b(?:compare|versus|vs|difference|both|respectively|between|each)\b", q, re.I))
     numeric_intent = bool(re.search(r"\b(?:what|how many|how long|port|size|number|interval|timeout|duration|threshold|bits|quorum|batch|blocks|time|window|length|lease)\b",q,re.I))
+    focus = terms_of(q) - terms_of(KB[best].split(". ")[0])
+    if not focus:
+        focus = terms_of(q)
     for score, i in scored[:max(5, request.top_k)]:
         if not compare and i != best:
             continue
         for s in SENTENCES[i]:
-            has_number = bool(re.search(r"\b\d+(?:\.\d+)?\b", s))
+            has_number = bool(re.search(r"\b\d+(?:\.\d+)?\b",s))
             if numeric_intent and not has_number:
                 continue
-            candidates.append((sentence_score(q,s) + (5.0 if numeric_intent else 0.0) + 0.12*score, score, i, s))
+            st = terms_of(s)
+            matched = focus & st
+            relevant = sum(math.log(1 + 50/(DF.get(t,0)+1)) for t in matched)
+            candidates.append((relevant*3 + len(matched)*2 + 0.05*sentence_score(q,s), score, i, s))
     candidates.sort(reverse=True)
     top_sentence_score, _, answer_source, sentence = candidates[0]
     if top_sentence_score < 1.8:
