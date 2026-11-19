@@ -181,7 +181,7 @@ def query(request: Query):
     q=clean_question(request.question.strip())
     empty={"answer":None,"sources":[],"scores":[],"confidence":0.0}
     if not q: return empty
-    subjects=_question_subjects(q)
+    subjects=_question_subjects(request.question)
     compare=bool(re.search(r"\b(?:compare|versus|vs|difference|both|respectively|between)\b",q,re.I))
     if not subjects:
         # Conservative abstention: do not invent a subject for unrelated questions.
